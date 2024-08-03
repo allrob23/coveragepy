@@ -548,7 +548,7 @@ class Coverage(TConfigurable):
 
         self._core = Core(
             warn=self._warn,
-            timid=self.config.timid,
+            config=self.config,
             metacov=self._metacov,
         )
         self._collector = Collector(
