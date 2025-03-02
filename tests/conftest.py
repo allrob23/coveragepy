@@ -22,6 +22,8 @@ import pytest
 from coverage import env
 from coverage.files import set_relative_directory
 
+from . import testenv
+
 # Pytest will rewrite assertions in test modules, but not elsewhere.
 # This tells pytest to also rewrite assertions in these files:
 pytest.register_assert_rewrite("tests.coveragetest")
@@ -57,7 +59,13 @@ def set_warnings() -> None:
     # Python3.13 added this warning, but the behavior has been the same all along,
     # without any reported problems, so just quiet the warning.
     # https://github.com/python/cpython/issues/105539
-    warnings.filterwarnings("ignore", r"unclosed database", category=ResourceWarning)
+    warnings.filterwarnings("ignore", "unclosed database", category=ResourceWarning)
+
+    # We run lots of tests of branch coverage.  Python 3.12+ had sys.monitoring
+    # but couldn't do branches well.  We warn about that, but don't need to see
+    # it in our test runs.
+    if testenv.SYS_MON and env.PYBEHAVIOR.pep669 and not env.PYBEHAVIOR.branch_right_left:
+        warnings.filterwarnings("ignore", "sys.monitoring can't measure branches in this version")
 
 
 @pytest.fixture(autouse=True)

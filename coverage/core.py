@@ -60,16 +60,25 @@ class Core:
         else:
             core_name = os.getenv("COVERAGE_CORE")
 
-            if core_name == "sysmon" and not env.PYBEHAVIOR.pep669:
-                warn("sys.monitoring isn't available, using default core", slug="no-sysmon")
-                core_name = None
+            if core_name == "sysmon":
+                if not env.PYBEHAVIOR.pep669:
+                    warn(
+                        "sys.monitoring isn't available in this version, using default core",
+                        slug="no-sysmon",
+                    )
+                    core_name = None
 
-            # if core_name == "sysmon" and config.branch and not env.PYBEHAVIOR.branch_right_left:
-            #     warn(
-            #         "sys.monitoring can't yet measure branches well, using default core",
-            #         slug="no-sysmon",
-            #     )
-            #     core_name = None
+                if config.branch and not env.PYBEHAVIOR.branch_right_left:
+                    if not env.METACOV:
+                        # I don't understand why, but with metacov, the
+                        # filterwarnings in conftest.py doesn't prevent this
+                        # warning, so it pollutes test output.
+                        warn(
+                            "sys.monitoring can't measure branches in this version, "
+                            + "using default core",
+                            slug="no-sysmon",
+                        )
+                    core_name = None
 
             if not core_name:
                 # Once we're comfortable with sysmon as a default:
